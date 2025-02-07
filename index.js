@@ -16,9 +16,9 @@ app.use((req, res, next) => {
     let token = req.header("Authorization")
 
     if (token != null) {
-        token = token.replace("Bearer ", "")
+        token = token.replace("Bearer ", process.env.JWT_SECRET)
 
-        jwt.verify(token, "nmg-secret-21!", 
+        jwt.verify(token, "", 
             (err, decoded) => {
                 if(!err) {
                     req.user = decoded;

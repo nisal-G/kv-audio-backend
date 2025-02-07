@@ -1,6 +1,9 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export function registerUser (req, res) {
 
@@ -38,7 +41,7 @@ export function loggingUser(req, res) {
                         lastName : user.lastName,
                         email : user.email,
                         role : user.role
-                    }, "nmg-secret-21!")
+                    }, process.env.JWT_SECRET)
 
                     res.json({message: "Login Successful", token : token})
                 } else {
