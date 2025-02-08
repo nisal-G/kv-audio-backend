@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema ({
         default : "Customer"
     },
     firstName : {
-        type : String,
+        type : String,  
         required : true
     },
     lastName : {
@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema ({
     phone : {
         type : String,
         required : true
+    },
+    profilePicture : {
+        type : String,
+        required : true,
+        default : ""
     }
 });
 
