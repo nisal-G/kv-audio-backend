@@ -43,7 +43,10 @@ export function loggingUser(req, res) {
                         role : user.role
                     }, process.env.JWT_SECRET)
 
-                    res.json({message: "Login Successful", token : token})
+                    res.json({message: "Login Successful!", token : token})
+
+                    console.log(req.decoded)
+                    
                 } else {
                     res.status(401).json({error: "Login Failed"})
                 }             
