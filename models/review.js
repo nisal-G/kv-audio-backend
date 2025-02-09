@@ -23,6 +23,11 @@ const reviewSchema = new mongoose.Schema({
         required : true,
         default : Date.now()
     },
+    profilePicture : {
+        type : String,
+        required : true,
+        default : "https://static.vecteezy.com/system/resources/thumbnails/036/280/650/small_2x/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg"
+    },
     isApproved : {
         type : Boolean,
         required : true,

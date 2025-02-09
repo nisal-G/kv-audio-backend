@@ -40,13 +40,12 @@ export function loggingUser(req, res) {
                         firstName : user.firstName,
                         lastName : user.lastName,
                         email : user.email,
-                        role : user.role
+                        role : user.role,
+                        profilePicture : user.profilePicture
                     }, process.env.JWT_SECRET)
 
                     res.json({message: "Login Successful!", token : token})
 
-                    console.log(req.decoded)
-                    
                 } else {
                     res.status(401).json({error: "Login Failed"})
                 }             
