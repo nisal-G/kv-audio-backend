@@ -9,6 +9,8 @@ export function addProducts (req, res) {
     return;
    }
 
+   console.log("gggggggg")
+
    if(req.user.role != "admin") {
     res.status(403).json( {message : "You are not authorized to perform this action !!"});
     return;
