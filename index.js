@@ -52,7 +52,6 @@ app.listen(3000,()=> {
 });
 
 
-console.log("Hello World")
 
 //"email": "nisal2004@gmail.com",
 //"password": "2004" customer
