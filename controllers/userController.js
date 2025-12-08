@@ -53,3 +53,13 @@ export function loggingUser(req, res) {
         }
     )
 }
+
+export function isItAdmin(req) {
+    
+    let isAdmin = false;
+    if(req.user != null && req.user.role === "Admin") {
+        isAdmin = true;
+    }
+
+    return isAdmin;
+}
