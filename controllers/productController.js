@@ -9,7 +9,7 @@ export async function addProducts (req, res) {
     return;
    }
 
-   if(req.user.role != "admin") {
+   if(req.user.role != "Admin") {
     res.status(403).json( {message : "You are not authorized to perform this action !!"});
     return;
    }

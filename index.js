@@ -53,8 +53,8 @@ app.listen(3000,()=> {
 
 
 
-//"email": "nisal2004@gmail.com",
-//"password": "2004" customer
+//"email": "nimgunathilaka021@gmail.com",
+//"password": "Nisal123" customer
 
-//"email": "nisal200421@gmail.com",
-//"password": "2004", admin
+//"email": "nimgunathilaka022@gmail.com",
+//"password": "Nisal123" admin
