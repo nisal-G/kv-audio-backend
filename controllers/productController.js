@@ -23,6 +23,14 @@ export async function addProducts (req, res) {
     } catch (error) {
         res.status(500).json({error: "Product registrartion failed. Please try again."});
     }
+}
 
+export async function getProducts (req, res) {
+    try {
+        const products = await Product.find();
+        res.json(products);
 
+    } catch (error) {
+        res.status(500).json({message: "Failed to fetch products. Please try again."});
+    }
 }
