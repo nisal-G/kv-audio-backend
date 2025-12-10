@@ -101,3 +101,36 @@ export async function deleteInquiry(req, res) {
         res.status(500).json({message: "Failed to delete inquiry"});
     }
 }
+
+
+export async function updateInquiry(req, res) {
+
+    try {
+        if(isItCustomer(req)) {
+
+            const inquiryId = req.params.id;
+            const data = req.body;
+
+            const inquiry = await Inquiry.findOne({id: inquiryId});
+
+            if(inquiry == null) {
+                res.status(404).json({error: "Inquiry not found"});
+                return
+            } else { 
+                if(inquiry.email == req.user.email) {
+                    await Inquiry.updateOne({id: inquiryId},{message: data.message});
+                    res.status(200).json({message: "Inquiry updated successfully"});
+                    return
+                } else {
+                    res.status(403).json({error: "You are not authorized to update this inquiry"});
+                    return
+                }
+            }
+        } else {
+            res.status(403).json({error: "Only customers can update inquiries"});
+            return
+        }
+    } catch (error) {
+        res.status(500).json({message: "Failed to update inquiry"});
+    }
+}
