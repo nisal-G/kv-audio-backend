@@ -4,27 +4,37 @@ import { isItCustomer } from "./userController.js";
 
 export async function addInquiry(req, res) {
 
-    if(isItCustomer(req)){
-        const data = req.body;
+    try {
 
-        try {
-            const newInquiry = new Inquiry({
-                id : data.id,
-                email : data.email,
-                message : data.message,
-                phone : data.phone
-            });
+        if(isItCustomer(req)) {
+            const data = req.body;
+            data.email = req.user.email;
+            data.phone = req.user.phone;
 
+            // Generate unique ID by finding the last inquiry
+            const lastInquiry = await Inquiry.findOne().sort({id: -1});
+
+            // Check if any inquiry exists (null means no inquiries)
+            let id;
+            if(lastInquiry == null) {
+                id = 1;  // First inquiry
+            } else {
+                id = lastInquiry.id + 1;  // Increment the last id
+            }
+
+            data.id = id;
+
+            const newInquiry = new Inquiry(data);
             await newInquiry.save();
-            res.json({message : "Inquiry added successfully"});
 
-        } catch (error) {
-            res.status(500).json({error : "Failed to add inquiry"})
+            res.status(201).json({message: "Inquiry added successfully"});
+        } else {
+            res.status(403).json({error: "Only customers can add inquiries"});
         }
-
-    } else {
-        res.status(403).json({error : "Access denied"})
-    }
+ 
+    } catch (error) {
+        res.status(500).json({message: "Failed to add inquiry", error: error.message});
+    }   
 }
 
 
