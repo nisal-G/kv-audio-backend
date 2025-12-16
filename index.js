@@ -9,11 +9,11 @@ import dotenv from "dotenv";
 import reviewRouter from "./routes/reviewRouter.js";
 import cors from "cors";
 
-app.use(cors());
-
 dotenv.config();
 
 const app = express();
+
+app.use(cors());
 
 app.use(bodyParser.json());
 

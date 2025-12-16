@@ -45,7 +45,7 @@ export function loggingUser(req, res) {
                         phone: user.phone
                     }, process.env.JWT_SECRET)
 
-                    res.json({message: "Login Successful!", token : token})
+                    res.json({message: "Login Successful!", token : token, user: user})
 
                 } else {
                     res.status(401).json({error: "Login Failed"})
