@@ -7,6 +7,9 @@ import inquiryRouter from "./routes/inquiryRouter.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import reviewRouter from "./routes/reviewRouter.js";
+import cors from "cors";
+
+app.use(cors());
 
 dotenv.config();
 
