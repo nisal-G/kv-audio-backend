@@ -36,13 +36,13 @@ const productSchema = new mongoose.Schema({
     
     availability : {
         type : Boolean,
-        required : true,
+        // required : true,
         default : true
     },
 
     image : {
         type : [String],
-        required : true,
+       // required : true,
         default : []
     }
 })
