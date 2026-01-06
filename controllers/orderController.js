@@ -26,12 +26,12 @@ export async function createOrder (req, res) {
         orderInfo.orderId = "ORD0001";
     } else {
         // Increment last order ID
-        const lastOrderId = lastOrder[0].orderId;
-        const lastOrderNumberInString = lastOrderId.replace("ORD", "");
-        const lastOrderNumber = parseInt(lastOrderNumberInString);
-        const newOrderNumber = lastOrderNumber + 1;
-        const newOrderId = "ORD" + newOrderNumber.toString().padStart(4, "0"); 
-        orderInfo.orderId = newOrderId;
+        const lastOrderId = lastOrder[0].orderId; // e.g., "ORD0005"
+        const lastOrderNumberInString = lastOrderId.replace("ORD", ""); // "0005"
+        const lastOrderNumber = parseInt(lastOrderNumberInString); // 5
+        const newOrderNumber = lastOrderNumber + 1; // 6
+        const newOrderId = "ORD" + newOrderNumber.toString().padStart(4, "0"); // "ORD0006"
+        orderInfo.orderId = newOrderId; // Set new order ID
     }
 
     // Calculate total cost for one day
