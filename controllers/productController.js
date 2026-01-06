@@ -75,3 +75,24 @@ export async function deleteProduct(req, res) {
         res.status(500).json({message: "Failed to delete product. Please try again."});
     }
 }
+
+
+export async function getProductByKey(req, res) {
+
+    try {
+        const key = req.params.key; 
+        const product = await Product.findOne( { key : key } );
+
+        if(product) {
+            if(product.availability || isItAdmin(req)) {
+                res.json(product);
+            } else {
+                res.status(403).json( {message : "You are not authorized to view this product !!"});
+            }
+        } else {
+            res.status(404).json( {message : "Product not found !!"});
+        }   
+    } catch (error) {
+        res.status(500).json({message: "Failed to fetch product. Please try again."});
+    }   
+}
