@@ -13,7 +13,10 @@ export async function createOrder (req, res) {
 
     // Check if user is logged in
     if(req.user == null){
-        return res.status(401).json({ message: "Please login and try again" });
+        return res.status(401).json({ 
+            message: "Authentication required",
+            error: "Please login to create an order" 
+        });
     }
 
     // Set user email
@@ -44,20 +47,28 @@ export async function createOrder (req, res) {
             // Find product by key
             const product = await Product.findOne({ key: data.orderedItems[i].key });
 
-            // Check if product exists
+            // Validate product exists in database
             if(product == null){
-                return res.status(404).json({ message: `Product with key ${data.orderedItems[i].key} not found` });
-            return;
+                return res.status(404).json({ 
+                    message: "Product not found",
+                    error: `Product "${data.orderedItems[i].key}" does not exist` 
+                });
             }
 
-            // Check product availability
+            // Verify product is available for booking
             if (product.availability === false) {
-                return res.status(400).json({ message: `Product ${product.name} is currently unavailable` });
+                return res.status(400).json({ 
+                    message: "Product unavailable",
+                    error: `"${product.name}" is not available for booking at this time` 
+                });
             }
 
-            // Check if product has images
+            // Ensure product has images for display
             if (!product.image || product.image.length === 0) {
-                return res.status(400).json({ message: `Product ${product.name} has no images available` });
+                return res.status(400).json({ 
+                    message: "Product images missing",
+                    error: `"${product.name}" has no images. Please upload images or remove from cart` 
+                });
             }
 
             // Add item to order
@@ -85,7 +96,7 @@ export async function createOrder (req, res) {
     orderInfo.endingDate = data.endingDate;
     orderInfo.totalAmount = oneDayCost * data.days;
 
-    // Save order to database
+    // Save the order to database
     try {
         const newOrder = new Order(orderInfo);
         const result = await newOrder.save();
@@ -94,4 +105,83 @@ export async function createOrder (req, res) {
         return res.status(500).json({ message: "Failed to create order", error: error.message });
     }   
 
+}
+
+
+export async function getQuote (req, res) {
+
+    const data = req.body;
+
+    // Initialize order information
+    const orderInfo = {
+        orderedItems : []
+    };
+
+    // Calculate total cost for one day
+    let oneDayCost = 0;
+
+    // Process each ordered item
+    for (let i = 0; i < data.orderedItems.length; i++) {
+
+        try {
+            // Find product by key
+            const product = await Product.findOne({ key: data.orderedItems[i].key });
+
+            // Validate product exists in database
+            if(product == null){
+                return res.status(404).json({ 
+                    message: "Product not found",
+                    error: `Product "${data.orderedItems[i].key}" does not exist` 
+                });
+            }
+
+            // Verify product is available for booking
+            if (product.availability === false) {
+                return res.status(400).json({ 
+                    message: "Product unavailable",
+                    error: `"${product.name}" is not available for booking at this time` 
+                });
+            }
+
+            // Ensure product has images for display
+            if (!product.image || product.image.length === 0) {
+                return res.status(400).json({ 
+                    message: "Product images missing",
+                    error: `"${product.name}" has no images. Please upload images or remove from cart` 
+                });
+            }
+
+            // Add item to order
+            orderInfo.orderedItems.push({
+                product: {
+                    key: product.key,
+                    name: product.name,
+                    image: product.image[0],
+                    price: product.price,
+                    quantity: data.orderedItems[i].qty
+                }
+            });
+
+            // Add to daily cost
+            oneDayCost += product.price * data.orderedItems[i].qty;
+
+        } catch (error) {
+            return res.status(400).json({ message: "Invalid ordered item format" });
+        }   
+    }
+
+    // Set order details
+    orderInfo.days = data.days;
+    orderInfo.startingDate = data.startingDate;
+    orderInfo.endingDate = data.endingDate;
+    orderInfo.totalAmount = oneDayCost * data.days;
+
+    try {
+        res.json({
+            message: "Quote calculated successfully",
+            total: orderInfo.totalAmount
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to calculate quote", error: error.message });
+    }   
 }
