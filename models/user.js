@@ -31,6 +31,13 @@ const userSchema = new mongoose.Schema ({
         type : String,
         required : true
     },
+
+    isBlocked : {
+        type : Boolean,
+        required : true,
+        default : false
+    },
+    
     profilePicture : {
         type : String,
         required : true,

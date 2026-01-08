@@ -75,3 +75,49 @@ export function isItCustomer(req) {
 
     return isItCustomer;
 }
+
+export async function getAllUsers(req, res) {
+    if(isItAdmin(req)) {
+        try {
+            const users = await User.find();
+            res.json(users);
+        } catch (error) {
+            res.status(500).json({ error: "Failed to retrieve users" });
+        }
+    } else {
+        res.status(403).json({ error: "Access denied" });
+    }
+}
+
+
+export async function blockOrUnblockUser(req, res)  {
+    if(isItAdmin(req)) {
+
+        const email = req.params.email;
+
+        if(isItAdmin(req)) {
+            try {
+                const user = await User.findOne({ email: email });
+
+            if (user === null) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            const isBlocked = !user.isBlocked; // Toggle the isBlocked status
+
+            // Update the user's isBlocked status in the database
+            await User.updateOne({ email: email }, { isBlocked: isBlocked });
+
+            return res.json({ message: `User has been ${isBlocked ? "blocked" : "unblocked"}` });
+            
+
+            } catch (error) {
+                return res.status(404).json({ error: "Failed to get User" });
+            }
+
+        } else {
+            res.status(403).json({ error: "Access denied" });
+        }
+
+    }  
+}
