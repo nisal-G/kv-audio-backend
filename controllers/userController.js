@@ -127,3 +127,18 @@ export async function blockOrUnblockUser(req, res)  {
 
     }  
 }
+
+
+export async function getUser(req, res) {
+
+    if (req.user != null) {
+        try {
+            const user = await User.findOne({ email: req.user.email });
+            res.json(user);
+        } catch (error) {
+            res.status(500).json({ error: "Failed to retrieve user data" });
+        }
+    } else {
+        res.status(401).json({ error: "Authentication required" });
+    }
+}
