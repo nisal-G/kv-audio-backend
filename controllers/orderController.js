@@ -1,5 +1,6 @@
 import Order from "../models/order.js";
 import Product from "../models/product.js";
+import { isItAdmin, isItCustomer } from "./userController.js";
 
 // Create a new order
 export async function createOrder (req, res) {
@@ -185,3 +186,54 @@ export async function getQuote (req, res) {
         return res.status(500).json({ message: "Failed to calculate quote", error: error.message });
     }   
 }
+
+
+export async function getOrders(req, res) { 
+
+    if(isItCustomer(req)) {
+        try {
+            const orders = await Order.find( { email : req.user.email } );
+            res.json(orders);
+        } catch (error) {
+            res.status(500).json({message: "Failed to fetch orders. Please try again."});
+        }
+    } else if(isItAdmin(req)) {
+        try {
+            const orders = await Order.find();
+            res.json(orders);
+        } catch (error) {   
+            res.status(500).json({message: "Failed to fetch orders. Please try again."});
+        }
+    } else {
+        res.status(403).json({ message: "Access denied. Admins and customers only." });
+    }
+       
+}
+
+export async function approveOrRejectOrder(req, res) {
+
+    const orderId = req.params.orderId;
+    const status = req.body.status;
+
+    if(isItAdmin(req)) {
+        try {
+            const order = await Order.findOne({ orderId: orderId });
+
+            if(order == null){
+                return res.status(404).json({ 
+                    message: "Order not found",
+                    error: `Order with ID "${orderId}" does not exist` 
+                });
+            }
+
+            await Order.updateOne({ orderId: orderId }, { status: status });
+
+            res.json({ message: `Order ${status} successfully.` });
+        } catch (error) {
+            res.status(500).json({ message: "Failed to update order status. Please try again." });
+        }
+
+    } else {
+        res.status(403).json({ message: "Access denied. Admins only." });
+    }
+}   

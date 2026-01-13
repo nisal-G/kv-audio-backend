@@ -32,6 +32,12 @@ export function loggingUser(req, res) {
             if(user == null) {
                 res.status(404).json({error : "User not found"})
             } else {
+
+                if(user.isBlocked) {
+                    return  res.status(403).json({error : "Your Account is blocked. Please contact support."})
+                    return;
+                }
+
                 const isPasswordCorrect = bcrypt.compareSync(data.password, user.password);
 
                 if(isPasswordCorrect) {
