@@ -3,8 +3,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import axios from "axios";
+import nodemailer from "nodemailer";
 
 dotenv.config();
+
+//Here configure nodemailer transport
+const transport = nodemailer.createTransport({ 
+    service: 'Gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
 
 export function registerUser (req, res) {
 
@@ -49,7 +62,8 @@ export function loggingUser(req, res) {
                         email : user.email,
                         role : user.role,
                         profilePicture : user.profilePicture,
-                        phone: user.phone
+                        phone: user.phone,
+                        emailVerified: user.emailVerified
                     }, process.env.JWT_SECRET)
 
                     res.json({message: "Login Successful!", token : token, user: user})
@@ -181,7 +195,8 @@ export async function loginWithGoogle (req, res) {
             email: user.email,
             role: user.role,
             profilePicture: user.profilePicture,
-            phone: user.phone
+            phone: user.phone,
+            emailVerified: true
         }, process.env.JWT_SECRET);
 
         return res.json({ message: "Login Successful!", token: token, user: user });
@@ -197,7 +212,8 @@ export async function loginWithGoogle (req, res) {
             address: 'Not Given',
             phone: 'Not Given',
             role: 'Customer',
-            isBlocked: false
+            isBlocked: false,
+            emailVerified: userDetails.email_verified || false
         });
 
         await newUser.save();
@@ -219,4 +235,42 @@ export async function loginWithGoogle (req, res) {
     console.error("Error fetching user info from Google:", error);
     return res.status(500).json({ error: "Failed to Login with Google" });  
 }
+}
+
+
+// Send OTP to Email
+export async function sendOTP(req, res) {
+
+    // Check if user is authenticated
+    if(req.user == null) {
+        return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Use authenticated user's email or the email from request body
+    const recipientEmail = req.body.email || req.user.email;
+    
+    if (!recipientEmail) {
+        return res.status(400).json({ error: "No email address provided" });
+    }
+
+    // Create email message
+    const message = {
+        from: process.env.EMAIL_USER,
+        to: recipientEmail,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is: ${req.body.otp}`
+    };
+
+    //transport is configured at the top of the file
+    // Send email
+    transport.sendMail(message, (err, info) => {
+        if (err) {
+            console.error('Error sending email:', err);
+            res.status(500).json({ error: 'Failed to send OTP email' });
+        } else {
+            console.log('Email sent:', info.response);
+            res.json({ message: 'OTP email sent successfully' });
+        }
+    });
+
 }
