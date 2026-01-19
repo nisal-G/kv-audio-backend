@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import OTP from "../models/otp.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -237,7 +238,6 @@ export async function loginWithGoogle (req, res) {
 }
 }
 
-
 // Send OTP to Email
 export async function sendOTP(req, res) {
 
@@ -246,11 +246,22 @@ export async function sendOTP(req, res) {
         return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Use authenticated user's email or the email from request body
-    const recipientEmail = req.body.email || req.user.email;
-    
-    if (!recipientEmail) {
-        return res.status(400).json({ error: "No email address provided" });
+    // Use authenticated user's email
+    const recipientEmail = req.user.email;
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // Save or update OTP in database (upsert: update if exists, insert if not)
+    try {
+        await OTP.findOneAndUpdate(
+            { email: recipientEmail },
+            { otp: otp, createdAt: new Date() },
+            { upsert: true, new: true }
+        );
+    } catch (error) {
+        console.error('Error saving OTP:', error);
+        return res.status(500).json({ error: "Failed to generate OTP" });
     }
 
     // Create email message
@@ -258,7 +269,7 @@ export async function sendOTP(req, res) {
         from: process.env.EMAIL_USER,
         to: recipientEmail,
         subject: 'Your OTP Code',
-        text: `Your OTP code is: ${req.body.otp}`
+        text: `Your OTP code is: ${otp}`
     };
 
     //transport is configured at the top of the file
@@ -272,5 +283,33 @@ export async function sendOTP(req, res) {
             res.json({ message: 'OTP email sent successfully' });
         }
     });
-
 }
+
+
+export async function verifyOTP(req, res) {
+
+    // Check if user is authenticated
+    if(req.user == null) {
+        return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const code = req.body.code;
+
+    const otp = await OTP.findOne( { email: req.user.email , otp : code} );
+
+    if(otp == null) {
+        return res.status(400).json( { error: "No OTP found. Please request a new one." } );
+    }
+    if(otp.otp === code) {
+
+        // Mark user's email as verified
+        await User.updateOne( { email: req.user.email }, { emailVerified: true } ); 
+        // Delete the OTP after successful verification
+        await OTP.deleteOne( { email: req.user.email } );
+        res.json( { message: "Email verified successfully" } );
+    } else {
+        res.status(400).json( { error: "Invalid OTP. Please try again." } );
+    }
+}
+
+
