@@ -37,6 +37,16 @@ export async function getReviews(req, res) {
     }
 }
 
+export async function getApprovedReviews(req, res) {
+    try {
+        // Public endpoint - returns only approved reviews
+        const reviews = await Review.find({ isApproved: true });
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch reviews. Please try again." });
+    }
+}
+
 export async function approveOrRejectReview(req, res) {
     const id = req.params.id;
     const isApproved = req.body.isApproved;
