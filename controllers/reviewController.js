@@ -39,8 +39,8 @@ export async function getReviews(req, res) {
 
 export async function getApprovedReviews(req, res) {
     try {
-        // Public endpoint - returns only approved reviews
-        const reviews = await Review.find({ isApproved: true });
+        // Public endpoint - returns only approved reviews, sorted by date (newest first)
+        const reviews = await Review.find({ isApproved: true }).sort({ date: -1 });
         res.json(reviews);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch reviews. Please try again." });
@@ -62,9 +62,11 @@ export async function approveOrRejectReview(req, res) {
                 });
             }
 
-            await Review.updateOne({ _id: id }, { isApproved: isApproved });
+            // Ensure isApproved is a boolean
+            const approvedStatus = Boolean(isApproved);
+            await Review.updateOne({ _id: id }, { isApproved: approvedStatus });
 
-            res.json({ message: `Review ${isApproved ? 'approved' : 'rejected'} successfully.` });
+            res.json({ message: `Review ${approvedStatus ? 'approved' : 'rejected'} successfully.` });
         } catch (error) {
             res.status(500).json({ message: "Failed to update review status. Please try again." });
         }
