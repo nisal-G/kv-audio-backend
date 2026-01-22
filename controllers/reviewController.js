@@ -14,6 +14,7 @@ export function addReview(req, res) {
     data.name = req.user.firstName + " " + req.user.lastName;
     data.profilePicture = req.user.profilePicture;
     data.email = req.user.email;
+    data.isApproved = false; // Add this line to explicitly set isApproved to false
 
     const newReview = new Review(data);
 
@@ -41,8 +42,10 @@ export async function getApprovedReviews(req, res) {
     try {
         // Public endpoint - returns only approved reviews, sorted by date (newest first)
         const reviews = await Review.find({ isApproved: true }).sort({ date: -1 });
+        console.log(`[getApprovedReviews] Found ${reviews.length} approved reviews`);
         res.json(reviews);
     } catch (error) {
+        console.error('[getApprovedReviews] Error:', error);
         res.status(500).json({ message: "Failed to fetch reviews. Please try again." });
     }
 }
@@ -64,7 +67,9 @@ export async function approveOrRejectReview(req, res) {
 
             // Ensure isApproved is a boolean
             const approvedStatus = Boolean(isApproved);
+            console.log(`[approveOrRejectReview] Updating review ${id} - isApproved: ${approvedStatus}`);
             await Review.updateOne({ _id: id }, { isApproved: approvedStatus });
+            console.log(`[approveOrRejectReview] Review ${id} ${approvedStatus ? 'approved' : 'rejected'} successfully`);
 
             res.json({ message: `Review ${approvedStatus ? 'approved' : 'rejected'} successfully.` });
         } catch (error) {
