@@ -220,4 +220,23 @@ curl -X POST http://localhost:3000/api/users/login \
     "password": "password123"
   }'
 ```
+---
+
+## 👥 Support
+
+For support or inquiries, please submit an inquiry through the platform or contact me directly.
+
+---
+
+## 🔄 Version History
+
+- **v1.0.0** - Initial release with core functionality
+  - User authentication and management
+  - Product catalog management
+  - Order processing system
+  - Review and inquiry systems
+
+---
+
+**Developed with ❤️ by Nisal Gunathilaka**
 
